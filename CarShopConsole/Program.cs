@@ -1,6 +1,7 @@
 ﻿using CarShopLibrary;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -14,8 +15,8 @@ namespace CarShopConsole
 
         static void Main(string[] args)
         {
-            CreaDatiDiProva();
-            Console.WriteLine("*** GESTIONE RIVENDITA VEICOLI USATI ***");
+            // CreaDatiDiProva();
+            CaricaDati();
             char scelta = ' ';
             while (scelta.ToString().ToLower() != "q")
             {
@@ -39,11 +40,37 @@ namespace CarShopConsole
                     case '3':
                         ElencoVeicoli("\n*** Elenco MOTO ***", typeof(Moto));
                         break;
+                    case 'h':
+                    case 'H':
+                        EsportaHtml();
+                        break;
                     default:
                         break;
                 }
             }
         }
+
+        private static void EsportaHtml()
+        {
+            int num = 0;
+            do
+            {
+                Console.Write("\nInserisci il numero d'ordine del veicolo: ");
+            } while (!int.TryParse(Console.ReadLine(), out num));
+            if (num > 0 && num < ParcoMezzi.Count)
+            {
+                Console.Clear();
+                Console.WriteLine("\n" + ParcoMezzi[num - 1] + "\n");
+                // Produrre volantino
+                Process.Start(AppDomain.CurrentDomain.BaseDirectory +  "/html/index.html");
+                Console.ReadKey();
+            }
+            else
+            {
+                Console.WriteLine("\nMezzo non esistente!\n");
+            }
+        }
+
 
         private static void SalvaDati()
         {
@@ -83,6 +110,7 @@ namespace CarShopConsole
 
         private static char ScriviMenu()
         {
+            Console.WriteLine("*** GESTIONE RIVENDITA VEICOLI USATI ***");
             Console.WriteLine("".PadLeft(30, '_'));
             Console.WriteLine("C - CARICA Dati");
             Console.WriteLine("S - SALVA Dati");
@@ -90,6 +118,8 @@ namespace CarShopConsole
             Console.WriteLine("1 - Visualizza TUTTI i veicoli");
             Console.WriteLine("2 - Visualizza le AUTO");
             Console.WriteLine("3 - Visualizza le MOTO");
+            Console.WriteLine("".PadLeft(30, '_'));
+            Console.WriteLine("H - Esporta Volatino HTML");
             Console.WriteLine("".PadLeft(30, '_'));
             Console.WriteLine("\nQ - USCITA");
             return Console.ReadKey(true).KeyChar;
