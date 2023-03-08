@@ -44,6 +44,10 @@ namespace CarShopConsole
                     case 'H':
                         EsportaHtml();
                         break;
+                    case 'w':
+                    case 'W':
+                        EsportaWord();
+                        break;
                     default:
                         break;
                 }
@@ -61,8 +65,31 @@ namespace CarShopConsole
             {
                 Console.Clear();
                 Console.WriteLine("\n" + ParcoMezzi[num - 1] + "\n");
-                // Produrre volantino
-                Process.Start(AppDomain.CurrentDomain.BaseDirectory +  "/html/index.html");
+                // Produrre volantino in html
+                Process.Start(AppDomain.CurrentDomain.BaseDirectory + "/html/index.html");
+                Console.ReadKey();
+            }
+            else
+            {
+                Console.WriteLine("\nMezzo non esistente!\n");
+            }
+        }
+
+        private static void EsportaWord()
+        {
+            int num = 0;
+            do
+            {
+                Console.Write("\nInserisci il numero d'ordine del veicolo: ");
+            } while (!int.TryParse(Console.ReadLine(), out num));
+            if (num > 0 && num < ParcoMezzi.Count)
+            {
+                Console.Clear();
+                Console.WriteLine("\n" + ParcoMezzi[num - 1] + "\n");
+                // Produrre volantino in word
+                string filePath = AppDomain.CurrentDomain.BaseDirectory + "/test.docx";
+                OpenXmlTools.GeneraVolantinoDocx(filePath);
+                Process.Start(filePath);
                 Console.ReadKey();
             }
             else
@@ -120,6 +147,7 @@ namespace CarShopConsole
             Console.WriteLine("3 - Visualizza le MOTO");
             Console.WriteLine("".PadLeft(30, '_'));
             Console.WriteLine("H - Esporta Volatino HTML");
+            Console.WriteLine("W - Esporta Volatino DOCX");
             Console.WriteLine("".PadLeft(30, '_'));
             Console.WriteLine("\nQ - USCITA");
             return Console.ReadKey(true).KeyChar;
