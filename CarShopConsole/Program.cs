@@ -77,11 +77,12 @@ namespace CarShopConsole
 
         private static void EsportaWord()
         {
-            int num = 0;
-            do
-            {
-                Console.Write("\nInserisci il numero d'ordine del veicolo: ");
-            } while (!int.TryParse(Console.ReadLine(), out num));
+            //int num = 0;
+            //do
+            //{
+            //    Console.Write("\nInserisci il numero d'ordine del veicolo: ");
+            //} while (!int.TryParse(Console.ReadLine(), out num));
+            int num = 1;
             if (num > 0 && num < ParcoMezzi.Count)
             {
                 Console.Clear();
