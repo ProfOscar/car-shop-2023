@@ -91,7 +91,7 @@ namespace CarShopConsole
                 string filePath = AppDomain.CurrentDomain.BaseDirectory + "/test.docx";
                 OpenXmlTools.GeneraVolantinoDocx(filePath);
                 Process.Start(filePath);
-                Console.ReadKey();
+                // Console.ReadKey();
             }
             else
             {
