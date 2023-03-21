@@ -1,0 +1,110 @@
+[
+  {
+    "$type": "auto",
+    "IsAWD": false,
+    "NumPorte": 0,
+    "DimCerchi": 0,
+    "Marca": "BMW",
+    "Modello": "Serie 3",
+    "Alimentazione": 1,
+    "Colore": "Blu",
+    "Dimensioni": {
+      "lunghezza": 0,
+      "larghezza": 0,
+      "altezza": 0
+    },
+    "VIN": null,
+    "Km": 0,
+    "MaxSpeed": 0,
+    "Potenza": 0,
+    "DataImmatricolazione": "0001-01-01T00:00:00",
+    "Prezzo": 0,
+    "Immagine": null
+  },
+  {
+    "$type": "auto",
+    "IsAWD": true,
+    "NumPorte": 5,
+    "DimCerchi": 18,
+    "Marca": "Mercedes",
+    "Modello": "CLA",
+    "Alimentazione": 2,
+    "Colore": "Grigio",
+    "Dimensioni": {
+      "lunghezza": 0,
+      "larghezza": 0,
+      "altezza": 0
+    },
+    "VIN": null,
+    "Km": 0,
+    "MaxSpeed": 0,
+    "Potenza": 0,
+    "DataImmatricolazione": "0001-01-01T00:00:00",
+    "Prezzo": 0,
+    "Immagine": null
+  },
+  {
+    "$type": "moto",
+    "Tipo": 2,
+    "NumTempi": 4,
+    "Marca": "Yamaha",
+    "Modello": "KZ5",
+    "Alimentazione": 1,
+    "Colore": "Verde",
+    "Dimensioni": {
+      "lunghezza": 270,
+      "larghezza": 87,
+      "altezza": 68
+    },
+    "VIN": "A34DE76PLYT90",
+    "Km": 3500,
+    "MaxSpeed": 210,
+    "Potenza": 130,
+    "DataImmatricolazione": "2021-03-15T00:00:00",
+    "Prezzo": 12750,
+    "Immagine": ""
+  },
+  {
+    "$type": "moto",
+    "Tipo": 3,
+    "NumTempi": 4,
+    "Marca": "Ducati",
+    "Modello": "RossoFuoco",
+    "Alimentazione": 1,
+    "Colore": "Rosso",
+    "Dimensioni": {
+      "lunghezza": 0,
+      "larghezza": 0,
+      "altezza": 0
+    },
+    "VIN": null,
+    "Km": 0,
+    "MaxSpeed": 0,
+    "Potenza": 0,
+    "DataImmatricolazione": "0001-01-01T00:00:00",
+    "Prezzo": 0,
+    "Immagine": null
+  },
+  {
+    "$type": "auto",
+    "IsAWD": false,
+    "NumPorte": 3,
+    "DimCerchi": 16,
+    "Marca": "Fiat",
+    "Modello": "500",
+    "Alimentazione": 3,
+    "Colore": "Bianco",
+    "Dimensioni": {
+      "lunghezza": 320,
+      "larghezza": 160,
+      "altezza": 140
+    },
+    "VIN": "TR5654ER55YJT5",
+    "Km": 37500,
+    "MaxSpeed": 140,
+    "Potenza": 90,
+    "DataImmatricolazione": "2021-10-13T00:00:00",
+    "Prezzo": 17500,
+    "Immagine": ""
+  }
+]
