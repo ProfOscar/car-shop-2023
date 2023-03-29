@@ -21,12 +21,17 @@ namespace CarShopLibrary
                 Body docBody = volantinoDocument.MainDocumentPart.Document.Body;
 
                 // creiamo alcuni stili
-                Style titolo1Style = CreaStile("Titolo1", "1100CC", "Lucida Console", 24);
+                Style titolo1Style = CreaStile("Mio Titolo 1", "1100CC", "Lucida Console", 24, 20, 30);
+                volantinoDocument.MainDocumentPart.StyleDefinitionsPart.Styles.Append(titolo1Style);
+                Style titolo2Style = CreaStile("Mio Titolo 2", "AA5522", "Tahoma", 18, 0, 8, JustificationValues.Center);
+                volantinoDocument.MainDocumentPart.StyleDefinitionsPart.Styles.Append(titolo2Style);
+                Style codiceStyle = CreaStile("Codice", "333333", "Courier New", 14);
+                volantinoDocument.MainDocumentPart.StyleDefinitionsPart.Styles.Append(codiceStyle);
 
                 // 3 paragrafi semplici
                 docBody.Append(CreaParagrafo("1° Paragrafo: " + lorem));
-                docBody.Append(CreaParagrafo("2° Paragrafo: " + lorem, false, JustificationValues.Center, "Comics Sans", 22));
-                docBody.Append(CreaParagrafo("3° Paragrafo: " + lorem, false, JustificationValues.Right));
+                docBody.Append(CreaParagrafo("2° Paragrafo: " + lorem, JustificationValues.Center, "Comics Sans", 22));
+                docBody.Append(CreaParagrafo("3° Paragrafo: " + lorem, JustificationValues.Right));
 
                 // paragrafo con contenuto formattato nei run
                 Paragraph p = CreaParagrafo();
@@ -42,13 +47,24 @@ namespace CarShopLibrary
                 p.Append(r);
                 docBody.Append(p);
 
-                volantinoDocument.MainDocumentPart.StyleDefinitionsPart.Styles.Append(titolo1Style);
-                p = CreaParagrafo("Test Titolo 1");
-                ParagraphProperties pp = new ParagraphProperties();
-                pp.ParagraphStyleId = new ParagraphStyleId();
-                pp.ParagraphStyleId.Val = "Titolo1";
-                p.PrependChild<ParagraphProperties>(pp);
+                // test paragrafo coin stile
+                p = CreaParagrafoConStile("Test Titolo 1", "Mio Titolo 1");
                 docBody.Append(p);
+                p = CreaParagrafoConStile("Test Titolo 2", "Mio Titolo 2");
+                docBody.Append(p);
+                p = CreaParagrafoConStile("Test Codice", "Codice");
+                docBody.Append(p);
+
+                // test tabella
+                string[,] contenutoTabella = new string[4, 2]
+                {
+                    { "MARCA" , "MODELLO" },
+                    { "IBM" , "Toledo" },
+                    { "Asus" , "Fulmine" },
+                    { "Lenovo" , "Super Professional" }
+                };
+                Table t = CreaTabella(contenutoTabella, TableRowAlignmentValues.Right, "FF22AA", 200);
+                docBody.Append(t);
             }
         }
 
@@ -75,9 +91,13 @@ namespace CarShopLibrary
             return wordDocument;
         }
 
-        public static Style CreaStile(string styleName, Color color, string fontFace, double fSize)
+        public static Style CreaStile(string nomeStile, string colore,
+            string tipoFont, double dimensioneFont,
+            int spazioPrima = 0, int spazioDopo = 8,
+            JustificationValues giustificazione = JustificationValues.Left)
         {
-            string styleId = styleName.Replace(" ", "");
+            string styleId = nomeStile.Replace(" ", "");
+
             // Create a new paragraph style and specify some of the properties.
             Style style = new DocumentFormat.OpenXml.Wordprocessing.Style()
             {
@@ -86,18 +106,23 @@ namespace CarShopLibrary
                 CustomStyle = true,
                 Default = false
             };
-            style.Append(new StyleName() { Val = styleName });
+            style.Append(new StyleName() { Val = nomeStile });
             style.Append(new BasedOn() { Val = "Normal" });
             style.Append(new NextParagraphStyle() { Val = "Normal" });
             style.Append(new UIPriority() { Val = 900 });
 
-            // Heading 1
+            ParagraphProperties paragraphProperties = new ParagraphProperties();
+            string before = (spazioPrima * 20).ToString();
+            string after = (spazioDopo * 20).ToString();
+            paragraphProperties.SpacingBetweenLines = new SpacingBetweenLines() { Before = before, After = after };
+            paragraphProperties.Justification = new Justification() { Val = giustificazione };
+            style.Append(paragraphProperties);
+
             StyleRunProperties styleRunProperties = new StyleRunProperties();
-            // Specify a 12 point size
-            RunFonts font = new RunFonts() { Ascii = fontFace };
-            fSize *= 2;
-            FontSize fontSize = new FontSize() { Val = fSize.ToString() };
-            styleRunProperties.Append(color);
+            RunFonts font = new RunFonts() { Ascii = tipoFont };
+            dimensioneFont *= 2;
+            FontSize fontSize = new FontSize() { Val = dimensioneFont.ToString() };
+            styleRunProperties.Append(new Color() { Val = colore });
             styleRunProperties.Append(font);
             styleRunProperties.Append(fontSize);
 
@@ -108,36 +133,47 @@ namespace CarShopLibrary
         }
 
         public static Paragraph CreaParagrafo(string contenuto = "",
-            bool useStyle = true, JustificationValues giustificazione = JustificationValues.Left,
+            JustificationValues giustificazione = JustificationValues.Left,
             string fontFace = "Calibri", double fontSize = 11)
         {
             Paragraph p = new Paragraph();
-            if (!useStyle)
+            if (giustificazione != JustificationValues.Left)
             {
-                if (giustificazione != JustificationValues.Left)
-                {
-                    ParagraphProperties pp = new ParagraphProperties();
-                    pp.Justification = new Justification() { Val = giustificazione };
-                    p.Append(pp);
-                }
+                ParagraphProperties pp = new ParagraphProperties();
+                pp.Justification = new Justification() { Val = giustificazione };
+                p.Append(pp);
             }
             if (contenuto.Length > 0)
             {
                 Run r = new Run();
-                if (!useStyle)
-                {
-                    // gestione font
-                    RunProperties rp = new RunProperties();
-                    RunFonts rf = new RunFonts() { Ascii = fontFace };
-                    fontSize *= 2;
-                    rp.FontSize = new FontSize() { Val = fontSize.ToString() };
-                    rp.Append(rf);
-                    r.Append(rp);
-                }
+                // gestione font
+                RunProperties rp = new RunProperties();
+                RunFonts rf = new RunFonts() { Ascii = fontFace };
+                fontSize *= 2;
+                rp.FontSize = new FontSize() { Val = fontSize.ToString() };
+                rp.Append(rf);
+                r.Append(rp);
                 Text t = new Text(contenuto);
                 r.Append(t);
                 p.Append(r);
             }
+            return p;
+        }
+
+        public static Paragraph CreaParagrafoConStile(string contenuto, string nomeStile)
+        {
+            Paragraph p = new Paragraph();
+            if (contenuto.Length > 0)
+            {
+                Run r = new Run();
+                Text t = new Text(contenuto);
+                r.Append(t);
+                p.Append(r);
+            }
+            ParagraphProperties pp = new ParagraphProperties();
+            string styleId = nomeStile.Replace(" ", "");
+            pp.ParagraphStyleId = new ParagraphStyleId() { Val = styleId };
+            p.PrependChild(pp);
             return p;
         }
 
@@ -159,6 +195,64 @@ namespace CarShopLibrary
             r.Append(t);
 
             return r;
+        }
+
+        public static Table CreaTabella(string[,] contenuto, 
+            TableRowAlignmentValues giustificazione = TableRowAlignmentValues.Left, 
+            string colore = "333333", int margine = 80)
+        {
+            Table table = new Table();
+            ModificaProprietaTabella(table, giustificazione, colore, margine);
+            for (int i = 0; i < contenuto.GetLength(0); i++)
+            {
+                TableRow tr = new TableRow();
+                for (int j = 0; j < contenuto.GetLength(1); j++)
+                {
+                    TableCell tc = new TableCell();
+                    // per evitare un padding inferiore nella cella
+                    TableCellProperties tcp = new TableCellProperties() { TableCellMargin = new TableCellMargin() { BottomMargin = new BottomMargin() { Width = "0" } } };
+                    tc.AppendChild(tcp);
+                    Paragraph p = new Paragraph(new Run(new Text(contenuto[i, j])));
+                    tc.Append(p);
+                    tr.Append(tc);
+                }
+                table.Append(tr);
+            }
+            return table;
+        }
+
+        private static void ModificaProprietaTabella(Table tabella, 
+            TableRowAlignmentValues giustificazione = TableRowAlignmentValues.Left, 
+            string colore = "333333", int margine = 80)
+        {
+            TableProperties tblProperties = new TableProperties();
+
+            tblProperties.TableJustification = new TableJustification() { Val = giustificazione };
+
+            TableBorders tblBorders = new TableBorders();
+            TopBorder topBorder = new TopBorder() { Val = new EnumValue<BorderValues>(BorderValues.Thick), Color = colore };
+            tblBorders.AppendChild(topBorder);
+            BottomBorder bottomBorder = new BottomBorder() { Val = new EnumValue<BorderValues>(BorderValues.Thick), Color = colore };
+            tblBorders.AppendChild(bottomBorder);
+            RightBorder rightBorder = new RightBorder() { Val = new EnumValue<BorderValues>(BorderValues.Thick), Color = colore };
+            tblBorders.AppendChild(rightBorder);
+            LeftBorder leftBorder = new LeftBorder() { Val = new EnumValue<BorderValues>(BorderValues.Thick), Color = colore };
+            tblBorders.AppendChild(leftBorder);
+            InsideHorizontalBorder insideHBorder = new InsideHorizontalBorder() { Val = new EnumValue<BorderValues>(BorderValues.Thick), Color = colore };
+            tblBorders.AppendChild(insideHBorder);
+            InsideVerticalBorder insideVBorder = new InsideVerticalBorder() { Val = new EnumValue<BorderValues>(BorderValues.Thick), Color = colore };
+            tblBorders.AppendChild(insideVBorder);
+
+            // margine fra le celle
+            TableCellMarginDefault tcm = new TableCellMarginDefault(
+                new TopMargin() { Width = margine.ToString(), Type = TableWidthUnitValues.Dxa },
+                new StartMargin() { Width = margine.ToString(), Type = TableWidthUnitValues.Dxa },
+                new BottomMargin() { Width = margine.ToString(), Type = TableWidthUnitValues.Dxa },
+                new EndMargin() { Width = margine.ToString(), Type = TableWidthUnitValues.Dxa });
+            tblProperties.AppendChild(tcm);
+
+            tblProperties.AppendChild(tblBorders);
+            tabella.Append(tblProperties);
         }
     }
 }
