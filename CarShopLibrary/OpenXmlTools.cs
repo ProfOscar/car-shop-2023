@@ -65,6 +65,17 @@ namespace CarShopLibrary
                 };
                 Table t = CreaTabella(contenutoTabella, TableRowAlignmentValues.Right, "FF22AA", 200);
                 docBody.Append(t);
+
+                // test elenco puntato
+                string[] contenutoElenco = new string[4]
+                {
+                    "Prima riga elenco",
+                    "Seconda riga elenco",
+                    "Terza riga elenco",
+                    "Quarta riga elenco"
+                };
+                CreaElenco(docBody, contenutoElenco);
+                CreaElenco(docBody, contenutoElenco, true);
             }
         }
 
@@ -75,7 +86,7 @@ namespace CarShopLibrary
             // Add a main document part
             MainDocumentPart mainPart = wordDocument.AddMainDocumentPart();
 
-            // Create the style part
+            // Create the StyleDefinitionsPart
             StyleDefinitionsPart styleDefinitionsPart = mainPart.AddNewPart<StyleDefinitionsPart>();
             Styles styles = styleDefinitionsPart.Styles;
             if (styles == null)
@@ -83,6 +94,25 @@ namespace CarShopLibrary
                 styleDefinitionsPart.Styles = new Styles();
                 styleDefinitionsPart.Styles.Save();
             }
+
+            // Create the NumberingDefinitionsPart (support for bullet list)
+            NumberingDefinitionsPart numberingPart =
+            mainPart.AddNewPart<NumberingDefinitionsPart>("UnorderedList");
+            Numbering element =
+              new Numbering(
+                new AbstractNum(
+                  new Level(
+                    new NumberingFormat() { Val = NumberFormatValues.Bullet },
+                    new LevelText() { Val = "•" }
+                  )
+                  { LevelIndex = 0 }
+                )
+                { AbstractNumberId = 1 },
+                new NumberingInstance(
+                  new AbstractNumId() { Val = 1 }
+                )
+                { NumberID = 1 });
+            element.Save(numberingPart);
 
             // Create the document structure and add some text
             mainPart.Document = new Document();
@@ -253,6 +283,39 @@ namespace CarShopLibrary
 
             tblProperties.AppendChild(tblBorders);
             tabella.Append(tblProperties);
+        }
+
+        public static void CreaElenco(Body docBody, string[] contenuto, bool isOrdered = false,
+            string fontFace = "Calibri", double fontSize = 11, string colore = "000000")
+        {
+            // Paragraph properties
+            SpacingBetweenLines sblUl = new SpacingBetweenLines() { After = "0" };  // Get rid of space between bullets  
+            Indentation iUl = new Indentation() { Left = "260", Hanging = "240" };  // correct indentation  
+            NumberingProperties npUl = new NumberingProperties(
+                new NumberingLevelReference() { Val = 0 },
+                new NumberingId() { Val = (isOrdered ? 2 : 1) }
+            );
+            ParagraphProperties ppUnordered = new ParagraphProperties(npUl, sblUl, iUl);
+            ppUnordered.ParagraphStyleId = new ParagraphStyleId() { Val = "ListParagraph" };
+
+            // Contenuto
+            for (int i = 0; i < contenuto.Length; i++)
+            {
+                Paragraph p = new Paragraph();
+                p.ParagraphProperties = new ParagraphProperties(ppUnordered.OuterXml);
+                Run r = new Run();
+                // gestione font
+                RunProperties rp = new RunProperties();
+                RunFonts rf = new RunFonts() { Ascii = fontFace };
+                fontSize *= 2;
+                rp.FontSize = new FontSize() { Val = fontSize.ToString() };
+                rp.Append(rf);
+                r.Append(rp);
+                Text t = new Text(contenuto[i]);
+                r.Append(t);
+                p.Append(r);
+                docBody.Append(p);
+            }
         }
     }
 }
