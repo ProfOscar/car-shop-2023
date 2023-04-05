@@ -3,9 +3,14 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+
+using Color = DocumentFormat.OpenXml.Wordprocessing.Color;
 
 namespace CarShopLibrary
 {
@@ -75,7 +80,11 @@ namespace CarShopLibrary
                     "Quarta riga elenco"
                 };
                 CreaElenco(docBody, contenutoElenco);
-                CreaElenco(docBody, contenutoElenco, true);
+                CreaElenco(docBody, contenutoElenco, true, "Tahoma", 20, "FF0000");
+
+                AggiungiImmagine(volantinoDocument.MainDocumentPart, 
+                    "https://www.robinsonpetshop.it/news/cms2017/wp-content/uploads/2022/07/GattinoPrimiMesi.jpg",
+                    "center", 100, 100);
             }
         }
 
@@ -288,6 +297,7 @@ namespace CarShopLibrary
         public static void CreaElenco(Body docBody, string[] contenuto, bool isOrdered = false,
             string fontFace = "Calibri", double fontSize = 11, string colore = "000000")
         {
+            fontSize *= 2;
             // Paragraph properties
             SpacingBetweenLines sblUl = new SpacingBetweenLines() { After = "0" };  // Get rid of space between bullets  
             Indentation iUl = new Indentation() { Left = "260", Hanging = "240" };  // correct indentation  
@@ -295,27 +305,51 @@ namespace CarShopLibrary
                 new NumberingLevelReference() { Val = 0 },
                 new NumberingId() { Val = (isOrdered ? 2 : 1) }
             );
-            ParagraphProperties ppUnordered = new ParagraphProperties(npUl, sblUl, iUl);
-            ppUnordered.ParagraphStyleId = new ParagraphStyleId() { Val = "ListParagraph" };
+            ParagraphProperties ppElenco = new ParagraphProperties(npUl, sblUl, iUl);
+            ppElenco.ParagraphStyleId = new ParagraphStyleId() { Val = "ListParagraph" };
+            RunProperties rpElenco = new RunProperties();
+            RunFonts rfElenco = new RunFonts() { Ascii = fontFace };
+            rpElenco.FontSize = new FontSize() { Val = fontSize.ToString() };
+            rpElenco.Color = new Color() { Val = colore };
+            rpElenco.Append(rfElenco);
+            ppElenco.Append(rpElenco);
 
             // Contenuto
             for (int i = 0; i < contenuto.Length; i++)
             {
                 Paragraph p = new Paragraph();
-                p.ParagraphProperties = new ParagraphProperties(ppUnordered.OuterXml);
+                p.ParagraphProperties = new ParagraphProperties(ppElenco.OuterXml);
                 Run r = new Run();
                 // gestione font
                 RunProperties rp = new RunProperties();
                 RunFonts rf = new RunFonts() { Ascii = fontFace };
-                fontSize *= 2;
                 rp.FontSize = new FontSize() { Val = fontSize.ToString() };
                 rp.Append(rf);
+                rp.Color = new Color() { Val = colore };
                 r.Append(rp);
                 Text t = new Text(contenuto[i]);
                 r.Append(t);
                 p.Append(r);
                 docBody.Append(p);
             }
+        }
+
+        public static void AggiungiImmagine(MainDocumentPart mainPart, string imgPath, string position = "left", int width = 0, int height = 0)
+        {
+            Paragraph pImg = new Paragraph();
+            ImagePart imagePart =  mainPart.AddImagePart(ImagePartType.Jpeg);
+
+            // Stream stream = OpenXMLImageHelper.FromImageUrlToStream(imgPath);
+
+            Image image = Image.FromStream(OpenXMLImageHelper.FromImageUrlToStream(imgPath));
+            imagePart.FeedData(OpenXMLImageHelper.FromImageUrlToStream(imgPath));
+            int iWidth = width > 0 ? width * 9525 : (int)Math.Round((decimal)image.Width * 9525);
+            int iHeight = height > 0 ? height * 9525 :  (int)Math.Round((decimal)image.Height * 9525);
+
+            // 1500000 and 1092000 are img width and height
+            Run rImg = new Run(OpenXMLImageHelper.DrawingManager(mainPart.GetIdOfPart(imagePart), "PictureName", iWidth, iHeight, position));
+            pImg.Append(rImg);
+            mainPart.Document.Body.Append(pImg);
         }
     }
 }
