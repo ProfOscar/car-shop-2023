@@ -164,9 +164,23 @@ namespace CarShopLibrary
             return r;
         }
 
-        public static Table CreaTabella(string[,] contenuto, 
-            TableRowAlignmentValues giustificazione = TableRowAlignmentValues.Left, 
-            string colore = "333333", int margine = 80)
+        public static Hyperlink CreaHyperlink(MainDocumentPart mainPart, string url, string contenuto,
+            bool isGrassetto = false, bool isCorsivo = false, bool isSottolineato = true,
+            string colore = "000000")
+        {
+            HyperlinkRelationship hr = mainPart.AddHyperlinkRelationship(new Uri(url), true);
+            string hrContactId = hr.Id;
+            return
+                new Hyperlink(
+                    new ProofError() { Type = ProofingErrorValues.GrammarStart },
+                    CreaRun(contenuto, isGrassetto, isCorsivo, isSottolineato, colore)
+                    )
+                { History = OnOffValue.FromBoolean(true), Id = hrContactId };
+        }
+
+        public static Table CreaTabella(string[,] contenuto,
+        TableRowAlignmentValues giustificazione = TableRowAlignmentValues.Left,
+        string colore = "333333", int margine = 80)
         {
             Table table = new Table();
             ModificaProprietaTabella(table, giustificazione, colore, margine);
@@ -188,8 +202,8 @@ namespace CarShopLibrary
             return table;
         }
 
-        private static void ModificaProprietaTabella(Table tabella, 
-            TableRowAlignmentValues giustificazione = TableRowAlignmentValues.Left, 
+        private static void ModificaProprietaTabella(Table tabella,
+            TableRowAlignmentValues giustificazione = TableRowAlignmentValues.Left,
             string colore = "333333", int margine = 80)
         {
             TableProperties tblProperties = new TableProperties();
@@ -265,7 +279,7 @@ namespace CarShopLibrary
         public static void AggiungiImmagine(MainDocumentPart mainPart, string imgPath, string position = "left", int width = 0, int height = 0)
         {
             Paragraph pImg = new Paragraph();
-            ImagePart imagePart =  mainPart.AddImagePart(ImagePartType.Jpeg);
+            ImagePart imagePart = mainPart.AddImagePart(ImagePartType.Jpeg);
 
             // Stream stream = OpenXMLImageHelper.FromImageUrlToStream(imgPath);
 
@@ -273,7 +287,7 @@ namespace CarShopLibrary
             // imagePart.FeedData(OpenXMLImageHelper.FromImageUrlToStream(imgPath));
             imagePart.FeedData(OpenXMLImageHelper.FromImageObjToStream(image));
             int iWidth = width > 0 ? width * 9525 : (int)Math.Round((decimal)image.Width * 9525);
-            int iHeight = height > 0 ? height * 9525 :  (int)Math.Round((decimal)image.Height * 9525);
+            int iHeight = height > 0 ? height * 9525 : (int)Math.Round((decimal)image.Height * 9525);
 
             // 1500000 and 1092000 are img width and height
             Run rImg = new Run(OpenXMLImageHelper.DrawingManager(mainPart.GetIdOfPart(imagePart), "PictureName", iWidth, iHeight, position));

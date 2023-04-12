@@ -168,6 +168,7 @@ namespace CarShopConsole
                 OpenXmlTools.CreaElenco(docBody, contenutoElenco);
                 OpenXmlTools.CreaElenco(docBody, contenutoElenco, true, "Tahoma", 20, "FF0000");
 
+                // test immagine
                 OpenXmlTools.AggiungiImmagine(volantinoDocument.MainDocumentPart,
                     "https://www.robinsonpetshop.it/news/cms2017/wp-content/uploads/2022/07/GattinoPrimiMesi.jpg",
                     "center", 100, 100);
@@ -179,7 +180,19 @@ namespace CarShopConsole
                 OpenXmlTools.AggiungiImmagine(volantinoDocument.MainDocumentPart,
                     "https://www.robinsonpetshop.it/news/cms2017/wp-content/uploads/2022/07/GattinoPrimiMesi.jpg",
                     "right", 150, 150);
-                p = OpenXmlTools.CreaParagrafo(); docBody.Append(p);
+
+                // test hyperlink
+                p = OpenXmlTools.CreaParagrafo();
+                Hyperlink hl = OpenXmlTools.CreaHyperlink(volantinoDocument.MainDocumentPart,
+                    "http://www.vallauri.edu", "testo grassetto, corsivo, sottolineato, arancione con link al sito del vallauri.",
+                    true, true, true, "FF9900");
+                p.Append(hl);
+                docBody.Append(p);
+                p = OpenXmlTools.CreaParagrafoConStile("", "Codice");
+                hl = OpenXmlTools.CreaHyperlink(volantinoDocument.MainDocumentPart,
+                    "http://www.vallauri.edu", "testo semplice con link al sito del vallauri.");
+                p.Append(hl);
+                docBody.Append(p);
             }
         }
 
