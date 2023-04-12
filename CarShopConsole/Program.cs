@@ -1,4 +1,6 @@
 ﻿using CarShopLibrary;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,6 +13,8 @@ namespace CarShopConsole
 {
     class Program
     {
+        const string lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quam augue, tempus id metus in, laoreet viverra quam. Sed vulputate risus lacus, et dapibus orci porttitor non.";
+
         static List<Veicolo> ParcoMezzi = new List<Veicolo>();
 
         static void Main(string[] args)
@@ -89,7 +93,7 @@ namespace CarShopConsole
                 Console.WriteLine("\n" + ParcoMezzi[num - 1] + "\n");
                 // Produrre volantino in word
                 string filePath = AppDomain.CurrentDomain.BaseDirectory + "/test.docx";
-                OpenXmlTools.GeneraVolantinoDocx(filePath);
+                GeneraVolantinoDocx(filePath);
                 Process.Start(filePath);
                 // Console.ReadKey();
             }
@@ -99,6 +103,85 @@ namespace CarShopConsole
             }
         }
 
+
+        public static void GeneraVolantinoDocx(string filePath)
+        {
+            WordprocessingDocument volantinoDocument = OpenXmlTools.CreaDocumento(filePath);
+            using (volantinoDocument)
+            {
+                Body docBody = volantinoDocument.MainDocumentPart.Document.Body;
+
+                // creiamo alcuni stili
+                Style titolo1Style = OpenXmlTools.CreaStile("Mio Titolo 1", "1100CC", "Lucida Console", 24, 20, 30);
+                volantinoDocument.MainDocumentPart.StyleDefinitionsPart.Styles.Append(titolo1Style);
+                Style titolo2Style = OpenXmlTools.CreaStile("Mio Titolo 2", "AA5522", "Tahoma", 18, 0, 8, JustificationValues.Center);
+                volantinoDocument.MainDocumentPart.StyleDefinitionsPart.Styles.Append(titolo2Style);
+                Style codiceStyle = OpenXmlTools.CreaStile("Codice", "333333", "Courier New", 14);
+                volantinoDocument.MainDocumentPart.StyleDefinitionsPart.Styles.Append(codiceStyle);
+
+                // 3 paragrafi semplici
+                docBody.Append(OpenXmlTools.CreaParagrafo("1° Paragrafo: " + lorem));
+                docBody.Append(OpenXmlTools.CreaParagrafo("2° Paragrafo: " + lorem, JustificationValues.Center, "Comics Sans", 22));
+                docBody.Append(OpenXmlTools.CreaParagrafo("3° Paragrafo: " + lorem, JustificationValues.Right));
+
+                // paragrafo con contenuto formattato nei run
+                Paragraph p = OpenXmlTools.CreaParagrafo();
+                Run r = OpenXmlTools.CreaRun("Testo normale, ");
+                p.Append(r);
+                r = OpenXmlTools.CreaRun("testo grassetto, ", true);
+                p.Append(r);
+                r = OpenXmlTools.CreaRun("testo corsivo, ", false, true);
+                p.Append(r);
+                r = OpenXmlTools.CreaRun("testo sottolineato, ", false, false, true);
+                p.Append(r);
+                r = OpenXmlTools.CreaRun("testo grassetto, corsivo, sottolineato, arancione.", true, true, true, "FF9900");
+                p.Append(r);
+                docBody.Append(p);
+
+                // test paragrafo coin stile
+                p = OpenXmlTools.CreaParagrafoConStile("Test Titolo 1", "Mio Titolo 1");
+                docBody.Append(p);
+                p = OpenXmlTools.CreaParagrafoConStile("Test Titolo 2", "Mio Titolo 2");
+                docBody.Append(p);
+                p = OpenXmlTools.CreaParagrafoConStile("Test Codice", "Codice");
+                docBody.Append(p);
+
+                // test tabella
+                string[,] contenutoTabella = new string[4, 2]
+                {
+                    { "MARCA" , "MODELLO" },
+                    { "IBM" , "Toledo" },
+                    { "Asus" , "Fulmine" },
+                    { "Lenovo" , "Super Professional" }
+                };
+                Table t = OpenXmlTools.CreaTabella(contenutoTabella, TableRowAlignmentValues.Right, "FF22AA", 200);
+                docBody.Append(t);
+
+                // test elenco puntato
+                string[] contenutoElenco = new string[4]
+                {
+                    "Prima riga elenco",
+                    "Seconda riga elenco",
+                    "Terza riga elenco",
+                    "Quarta riga elenco"
+                };
+                OpenXmlTools.CreaElenco(docBody, contenutoElenco);
+                OpenXmlTools.CreaElenco(docBody, contenutoElenco, true, "Tahoma", 20, "FF0000");
+
+                OpenXmlTools.AggiungiImmagine(volantinoDocument.MainDocumentPart,
+                    "https://www.robinsonpetshop.it/news/cms2017/wp-content/uploads/2022/07/GattinoPrimiMesi.jpg",
+                    "center", 100, 100);
+                p = OpenXmlTools.CreaParagrafo(); docBody.Append(p);
+                OpenXmlTools.AggiungiImmagine(volantinoDocument.MainDocumentPart,
+                    "https://www.robinsonpetshop.it/news/cms2017/wp-content/uploads/2022/07/GattinoPrimiMesi.jpg",
+                    "left", 200, 200);
+                p = OpenXmlTools.CreaParagrafo(); docBody.Append(p);
+                OpenXmlTools.AggiungiImmagine(volantinoDocument.MainDocumentPart,
+                    "https://www.robinsonpetshop.it/news/cms2017/wp-content/uploads/2022/07/GattinoPrimiMesi.jpg",
+                    "right", 150, 150);
+                p = OpenXmlTools.CreaParagrafo(); docBody.Append(p);
+            }
+        }
 
         private static void SalvaDati()
         {
