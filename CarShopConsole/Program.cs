@@ -52,6 +52,10 @@ namespace CarShopConsole
                     case 'W':
                         EsportaWord();
                         break;
+                    case 'x':
+                    case 'X':
+                        EsportaExcel();
+                        break;
                     default:
                         break;
                 }
@@ -77,6 +81,11 @@ namespace CarShopConsole
             {
                 Console.WriteLine("\nMezzo non esistente!\n");
             }
+        }
+
+        private static void EsportaExcel()
+        {
+            OpenXmlExcelTools.CreateXlsx(ParcoMezzi, AppDomain.CurrentDomain.BaseDirectory + "/test.xlsx");
         }
 
         private static void EsportaWord()
@@ -224,9 +233,10 @@ namespace CarShopConsole
             int conta = 0;
             foreach (var item in ParcoMezzi)
             {
-                if (tipo == null || tipo == item.GetType()) { 
+                if (tipo == null || tipo == item.GetType())
+                {
                     conta++;
-                    Console.WriteLine(conta.ToString() + " - " +  item.ToString(true));
+                    Console.WriteLine(conta.ToString() + " - " + item.ToString(true));
                 }
             }
             Console.WriteLine("\n");
@@ -245,6 +255,7 @@ namespace CarShopConsole
             Console.WriteLine("".PadLeft(30, '_'));
             Console.WriteLine("H - Esporta Volatino HTML");
             Console.WriteLine("W - Esporta Volatino DOCX");
+            Console.WriteLine("X - Esporta Volatino XLSX");
             Console.WriteLine("".PadLeft(30, '_'));
             Console.WriteLine("\nQ - USCITA");
             return Console.ReadKey(true).KeyChar;
@@ -256,8 +267,8 @@ namespace CarShopConsole
             ParcoMezzi.Add(v);
             v = new Auto("Mercedes", "CLA", EAlimentazione.Diesel, "Grigio", true, 5, 18);
             ParcoMezzi.Add(v);
-            v = new Moto("Yamaha", "KZ5", EAlimentazione.Benzina, "Verde", 
-                new StructDimensioni(270,87,68), "A34DE76PLYT90", 3500, 210,
+            v = new Moto("Yamaha", "KZ5", EAlimentazione.Benzina, "Verde",
+                new StructDimensioni(270, 87, 68), "A34DE76PLYT90", 3500, 210,
                 130, new DateTime(2021, 03, 15), 12750, "",
                 ETipoMoto.Enduro, 4);
             ParcoMezzi.Add(v);
