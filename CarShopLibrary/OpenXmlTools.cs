@@ -342,7 +342,8 @@ namespace CarShopLibrary
             // Stream stream = OpenXMLImageHelper.FromImageUrlToStream(imgPath);
 
             Image image = Image.FromStream(OpenXMLImageHelper.FromImageUrlToStream(imgPath));
-            imagePart.FeedData(OpenXMLImageHelper.FromImageUrlToStream(imgPath));
+            // imagePart.FeedData(OpenXMLImageHelper.FromImageUrlToStream(imgPath));
+            imagePart.FeedData(OpenXMLImageHelper.FromImageObjToStream(image));
             int iWidth = width > 0 ? width * 9525 : (int)Math.Round((decimal)image.Width * 9525);
             int iHeight = height > 0 ? height * 9525 :  (int)Math.Round((decimal)image.Height * 9525);
 

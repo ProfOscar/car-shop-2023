@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Drawing;
 using System.Net;
 
 using DocumentFormat.OpenXml;
@@ -20,6 +21,14 @@ namespace CarShopLibrary
             req.Credentials = CredentialCache.DefaultCredentials;
             HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
             return resp.GetResponseStream();
+        }
+
+        internal static Stream FromImageObjToStream(Image imgObj)
+        {
+            MemoryStream stream = new MemoryStream();
+            imgObj.Save(stream, imgObj.RawFormat);
+            stream.Position = 0;
+            return stream;
         }
 
         // To insert the picture
