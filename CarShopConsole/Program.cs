@@ -74,7 +74,7 @@ namespace CarShopConsole
                 Console.Clear();
                 Console.WriteLine("\n" + ParcoMezzi[num - 1] + "\n");
                 // Produrre volantino in html
-                Process.Start(AppDomain.CurrentDomain.BaseDirectory + "/html/index.html");
+                // Process.Start(AppDomain.CurrentDomain.BaseDirectory + "/html/index.html");
                 Console.ReadKey();
             }
             else
@@ -85,7 +85,10 @@ namespace CarShopConsole
 
         private static void EsportaExcel()
         {
+            Console.Clear();
+            string filePath = AppDomain.CurrentDomain.BaseDirectory + "/test.xlsx";
             OpenXmlExcelTools.CreateXlsx(ParcoMezzi, AppDomain.CurrentDomain.BaseDirectory + "/test.xlsx");
+            Process.Start(filePath);
         }
 
         private static void EsportaWord()
@@ -115,44 +118,44 @@ namespace CarShopConsole
 
         public static void GeneraVolantinoDocx(string filePath)
         {
-            WordprocessingDocument volantinoDocument = OpenXmlTools.CreaDocumento(filePath);
+            WordprocessingDocument volantinoDocument = OpenXmlWordTools.CreaDocumento(filePath);
             using (volantinoDocument)
             {
                 Body docBody = volantinoDocument.MainDocumentPart.Document.Body;
 
                 // creiamo alcuni stili
-                Style titolo1Style = OpenXmlTools.CreaStile("Mio Titolo 1", "1100CC", "Lucida Console", 24, 20, 30);
+                Style titolo1Style = OpenXmlWordTools.CreaStile("Mio Titolo 1", "1100CC", "Lucida Console", 24, 20, 30);
                 volantinoDocument.MainDocumentPart.StyleDefinitionsPart.Styles.Append(titolo1Style);
-                Style titolo2Style = OpenXmlTools.CreaStile("Mio Titolo 2", "AA5522", "Tahoma", 18, 0, 8, JustificationValues.Center);
+                Style titolo2Style = OpenXmlWordTools.CreaStile("Mio Titolo 2", "AA5522", "Tahoma", 18, 0, 8, JustificationValues.Center);
                 volantinoDocument.MainDocumentPart.StyleDefinitionsPart.Styles.Append(titolo2Style);
-                Style codiceStyle = OpenXmlTools.CreaStile("Codice", "333333", "Courier New", 14);
+                Style codiceStyle = OpenXmlWordTools.CreaStile("Codice", "333333", "Courier New", 14);
                 volantinoDocument.MainDocumentPart.StyleDefinitionsPart.Styles.Append(codiceStyle);
 
                 // 3 paragrafi semplici
-                docBody.Append(OpenXmlTools.CreaParagrafo("1° Paragrafo: " + lorem));
-                docBody.Append(OpenXmlTools.CreaParagrafo("2° Paragrafo: " + lorem, JustificationValues.Center, "Comics Sans", 22));
-                docBody.Append(OpenXmlTools.CreaParagrafo("3° Paragrafo: " + lorem, JustificationValues.Right));
+                docBody.Append(OpenXmlWordTools.CreaParagrafo("1° Paragrafo: " + lorem));
+                docBody.Append(OpenXmlWordTools.CreaParagrafo("2° Paragrafo: " + lorem, JustificationValues.Center, "Comics Sans", 22));
+                docBody.Append(OpenXmlWordTools.CreaParagrafo("3° Paragrafo: " + lorem, JustificationValues.Right));
 
                 // paragrafo con contenuto formattato nei run
-                Paragraph p = OpenXmlTools.CreaParagrafo();
-                Run r = OpenXmlTools.CreaRun("Testo normale, ");
+                Paragraph p = OpenXmlWordTools.CreaParagrafo();
+                Run r = OpenXmlWordTools.CreaRun("Testo normale, ");
                 p.Append(r);
-                r = OpenXmlTools.CreaRun("testo grassetto, ", true);
+                r = OpenXmlWordTools.CreaRun("testo grassetto, ", true);
                 p.Append(r);
-                r = OpenXmlTools.CreaRun("testo corsivo, ", false, true);
+                r = OpenXmlWordTools.CreaRun("testo corsivo, ", false, true);
                 p.Append(r);
-                r = OpenXmlTools.CreaRun("testo sottolineato, ", false, false, true);
+                r = OpenXmlWordTools.CreaRun("testo sottolineato, ", false, false, true);
                 p.Append(r);
-                r = OpenXmlTools.CreaRun("testo grassetto, corsivo, sottolineato, arancione.", true, true, true, "FF9900");
+                r = OpenXmlWordTools.CreaRun("testo grassetto, corsivo, sottolineato, arancione.", true, true, true, "FF9900");
                 p.Append(r);
                 docBody.Append(p);
 
                 // test paragrafo coin stile
-                p = OpenXmlTools.CreaParagrafoConStile("Test Titolo 1", "Mio Titolo 1");
+                p = OpenXmlWordTools.CreaParagrafoConStile("Test Titolo 1", "Mio Titolo 1");
                 docBody.Append(p);
-                p = OpenXmlTools.CreaParagrafoConStile("Test Titolo 2", "Mio Titolo 2");
+                p = OpenXmlWordTools.CreaParagrafoConStile("Test Titolo 2", "Mio Titolo 2");
                 docBody.Append(p);
-                p = OpenXmlTools.CreaParagrafoConStile("Test Codice", "Codice");
+                p = OpenXmlWordTools.CreaParagrafoConStile("Test Codice", "Codice");
                 docBody.Append(p);
 
                 // test tabella
@@ -163,7 +166,7 @@ namespace CarShopConsole
                     { "Asus" , "Fulmine" },
                     { "Lenovo" , "Super Professional" }
                 };
-                Table t = OpenXmlTools.CreaTabella(contenutoTabella, TableRowAlignmentValues.Right, "FF22AA", 200);
+                Table t = OpenXmlWordTools.CreaTabella(contenutoTabella, TableRowAlignmentValues.Right, "FF22AA", 200);
                 docBody.Append(t);
 
                 // test elenco puntato
@@ -174,31 +177,31 @@ namespace CarShopConsole
                     "Terza riga elenco",
                     "Quarta riga elenco"
                 };
-                OpenXmlTools.CreaElenco(docBody, contenutoElenco);
-                OpenXmlTools.CreaElenco(docBody, contenutoElenco, true, "Tahoma", 20, "FF0000");
+                OpenXmlWordTools.CreaElenco(docBody, contenutoElenco);
+                OpenXmlWordTools.CreaElenco(docBody, contenutoElenco, true, "Tahoma", 20, "FF0000");
 
                 // test immagine
-                OpenXmlTools.AggiungiImmagine(volantinoDocument.MainDocumentPart,
+                OpenXmlWordTools.AggiungiImmagine(volantinoDocument.MainDocumentPart,
                     "https://www.robinsonpetshop.it/news/cms2017/wp-content/uploads/2022/07/GattinoPrimiMesi.jpg",
                     "center", 100, 100);
-                p = OpenXmlTools.CreaParagrafo(); docBody.Append(p);
-                OpenXmlTools.AggiungiImmagine(volantinoDocument.MainDocumentPart,
+                p = OpenXmlWordTools.CreaParagrafo(); docBody.Append(p);
+                OpenXmlWordTools.AggiungiImmagine(volantinoDocument.MainDocumentPart,
                     "https://www.robinsonpetshop.it/news/cms2017/wp-content/uploads/2022/07/GattinoPrimiMesi.jpg",
                     "left", 200, 200);
-                p = OpenXmlTools.CreaParagrafo(); docBody.Append(p);
-                OpenXmlTools.AggiungiImmagine(volantinoDocument.MainDocumentPart,
+                p = OpenXmlWordTools.CreaParagrafo(); docBody.Append(p);
+                OpenXmlWordTools.AggiungiImmagine(volantinoDocument.MainDocumentPart,
                     "https://www.robinsonpetshop.it/news/cms2017/wp-content/uploads/2022/07/GattinoPrimiMesi.jpg",
                     "right", 150, 150);
 
                 // test hyperlink
-                p = OpenXmlTools.CreaParagrafo();
-                Hyperlink hl = OpenXmlTools.CreaHyperlink(volantinoDocument.MainDocumentPart,
+                p = OpenXmlWordTools.CreaParagrafo();
+                Hyperlink hl = OpenXmlWordTools.CreaHyperlink(volantinoDocument.MainDocumentPart,
                     "http://www.vallauri.edu", "testo grassetto, corsivo, sottolineato, arancione con link al sito del vallauri.",
                     true, true, true, "FF9900");
                 p.Append(hl);
                 docBody.Append(p);
-                p = OpenXmlTools.CreaParagrafoConStile("", "Codice");
-                hl = OpenXmlTools.CreaHyperlink(volantinoDocument.MainDocumentPart,
+                p = OpenXmlWordTools.CreaParagrafoConStile("", "Codice");
+                hl = OpenXmlWordTools.CreaHyperlink(volantinoDocument.MainDocumentPart,
                     "http://www.vallauri.edu", "testo semplice con link al sito del vallauri.");
                 p.Append(hl);
                 docBody.Append(p);

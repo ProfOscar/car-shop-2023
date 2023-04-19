@@ -80,7 +80,7 @@
     <Compile Include="Moto.cs" />
     <Compile Include="OpenXmlExcelTools.cs" />
     <Compile Include="OpenXmlImageHelper.cs" />
-    <Compile Include="OpenXmlTools.cs" />
+    <Compile Include="OpenXmlWordTools.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Veicolo.cs" />
   </ItemGroup>

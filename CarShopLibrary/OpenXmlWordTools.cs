@@ -14,7 +14,7 @@ using Color = DocumentFormat.OpenXml.Wordprocessing.Color;
 
 namespace CarShopLibrary
 {
-    public class OpenXmlTools
+    public class OpenXmlWordTools
     {
         public static WordprocessingDocument CreaDocumento(string filePath)
         {
