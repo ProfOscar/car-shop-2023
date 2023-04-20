@@ -236,9 +236,10 @@ namespace CarShopLibrary
             tabella.Append(tblProperties);
         }
 
-        public static void CreaElenco(Body docBody, string[] contenuto, bool isOrdered = false,
+        public static List<Paragraph> CreaElenco(string[] contenuto, bool isOrdered = false,
             string fontFace = "Calibri", double fontSize = 11, string colore = "000000")
         {
+            List<Paragraph> retVal = new List<Paragraph>();
             fontSize *= 2;
             // Paragraph properties
             SpacingBetweenLines sblUl = new SpacingBetweenLines() { After = "0" };  // Get rid of space between bullets  
@@ -272,11 +273,12 @@ namespace CarShopLibrary
                 Text t = new Text(contenuto[i]);
                 r.Append(t);
                 p.Append(r);
-                docBody.Append(p);
+                retVal.Add(p);
             }
+            return retVal;
         }
 
-        public static void AggiungiImmagine(MainDocumentPart mainPart, string imgPath, string position = "left", int width = 0, int height = 0)
+        public static Paragraph AggiungiImmagine(MainDocumentPart mainPart, string imgPath, string position = "left", int width = 0, int height = 0)
         {
             Paragraph pImg = new Paragraph();
             ImagePart imagePart = mainPart.AddImagePart(ImagePartType.Jpeg);
@@ -292,7 +294,7 @@ namespace CarShopLibrary
             // 1500000 and 1092000 are img width and height
             Run rImg = new Run(OpenXMLImageHelper.DrawingManager(mainPart.GetIdOfPart(imagePart), "PictureName", iWidth, iHeight, position));
             pImg.Append(rImg);
-            mainPart.Document.Body.Append(pImg);
+            return pImg;
         }
     }
 }

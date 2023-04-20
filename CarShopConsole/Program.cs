@@ -177,21 +177,26 @@ namespace CarShopConsole
                     "Terza riga elenco",
                     "Quarta riga elenco"
                 };
-                OpenXmlWordTools.CreaElenco(docBody, contenutoElenco);
-                OpenXmlWordTools.CreaElenco(docBody, contenutoElenco, true, "Tahoma", 20, "FF0000");
+                List<Paragraph> elenco = OpenXmlWordTools.CreaElenco(contenutoElenco);
+                foreach (var item in elenco) docBody.Append(item);
+                elenco = OpenXmlWordTools.CreaElenco(contenutoElenco, true, "Tahoma", 20, "FF0000");
+                foreach (var item in elenco) docBody.Append(item);
 
                 // test immagine
-                OpenXmlWordTools.AggiungiImmagine(volantinoDocument.MainDocumentPart,
+                p= OpenXmlWordTools.AggiungiImmagine(volantinoDocument.MainDocumentPart,
                     "https://www.robinsonpetshop.it/news/cms2017/wp-content/uploads/2022/07/GattinoPrimiMesi.jpg",
                     "center", 100, 100);
+                docBody.Append(p);
                 p = OpenXmlWordTools.CreaParagrafo(); docBody.Append(p);
-                OpenXmlWordTools.AggiungiImmagine(volantinoDocument.MainDocumentPart,
+                p = OpenXmlWordTools.AggiungiImmagine(volantinoDocument.MainDocumentPart,
                     "https://www.robinsonpetshop.it/news/cms2017/wp-content/uploads/2022/07/GattinoPrimiMesi.jpg",
                     "left", 200, 200);
+                docBody.Append(p);
                 p = OpenXmlWordTools.CreaParagrafo(); docBody.Append(p);
-                OpenXmlWordTools.AggiungiImmagine(volantinoDocument.MainDocumentPart,
+                p = OpenXmlWordTools.AggiungiImmagine(volantinoDocument.MainDocumentPart,
                     "https://www.robinsonpetshop.it/news/cms2017/wp-content/uploads/2022/07/GattinoPrimiMesi.jpg",
                     "right", 150, 150);
+                docBody.Append(p);
 
                 // test hyperlink
                 p = OpenXmlWordTools.CreaParagrafo();
