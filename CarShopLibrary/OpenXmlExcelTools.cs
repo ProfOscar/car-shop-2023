@@ -2,14 +2,9 @@
 using DocumentFormat.OpenXml.Packaging;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Reflection;
-using A = DocumentFormat.OpenXml.Drawing;
-using DW = DocumentFormat.OpenXml.Drawing.Wordprocessing;
-using excel = DocumentFormat.OpenXml.Spreadsheet;
-using PIC = DocumentFormat.OpenXml.Drawing.Pictures;
-using word = DocumentFormat.OpenXml.Wordprocessing;
+
+using DocumentFormat.OpenXml.Spreadsheet;
 using X14 = DocumentFormat.OpenXml.Office2010.Excel;
 using X15 = DocumentFormat.OpenXml.Office2013.Excel;
 
@@ -18,114 +13,86 @@ namespace CarShopLibrary
     public class OpenXmlExcelTools
     {
 
-        public static string CreateXlsx(List<Veicolo> veicoli, string outputPath)
+        public static SpreadsheetDocument CreaDocumento(string filePath)
         {
-            var datetime = DateTime.Now.ToString().Replace("/", "_").Replace(":", "_");
-            if (File.Exists(outputPath))
+            SpreadsheetDocument excelDocument = SpreadsheetDocument.Create(filePath, SpreadsheetDocumentType.Workbook);
+            using (excelDocument)
             {
-                outputPath = Path.GetFileNameWithoutExtension(outputPath) + "_" + datetime + "-" + ".xlsx";
+                WorkbookPart workbookPart1 = excelDocument.AddWorkbookPart();
+                GenerateWorkbookPartContent(workbookPart1);
+                WorkbookStylesPart workbookStylesPart1 = workbookPart1.AddNewPart<WorkbookStylesPart>("rId3");
+                GenerateWorkbookStylesPartContent(workbookStylesPart1);
+                WorksheetPart worksheetPart1 = workbookPart1.AddNewPart<WorksheetPart>("rId1");
+                SheetData sheetData1 = new SheetData();
+                Author autore = new Author(Environment.UserName);
+                sheetData1.Append(autore);
+                GenerateWorksheetPartContent(worksheetPart1, sheetData1);
             }
+            return excelDocument;
+        }
 
-            using (SpreadsheetDocument package = SpreadsheetDocument.Create(outputPath, SpreadsheetDocumentType.Workbook))
+        public static Row CreaIntestazione(string[] contenuto)
+        {
+            Row row = new Row();
+            for (int i = 0; i < contenuto.Length; i++)
             {
-                CreatePartsForExcel(package, veicoli);
+                row.Append(CreateCell(contenuto[i], 2U));
             }
-            return outputPath;
+            return row;
         }
 
-        private static void CreatePartsForExcel(SpreadsheetDocument package, List<Veicolo> veicoli)
+        private static Cell CreateCell(string text, uint styleIndex = 1U)
         {
-            excel.SheetData partSheetData = GenerateSheetdataForDetails(veicoli);
-
-            WorkbookPart workbookPart1 = package.AddWorkbookPart();
-            GenerateWorkbookPartContent(workbookPart1);
-
-            WorkbookStylesPart workbookStylesPart1 = workbookPart1.AddNewPart<WorkbookStylesPart>("rId3");
-            GenerateWorkbookStylesPartContent(workbookStylesPart1);
-
-            WorksheetPart worksheetPart1 = workbookPart1.AddNewPart<WorksheetPart>("rId1");
-            GenerateWorksheetPartContent(worksheetPart1, partSheetData);
+            Cell cell = new Cell();
+            cell.StyleIndex = styleIndex;
+            cell.DataType = ResolveCellDataTypeOnValue(text);
+            cell.CellValue = new CellValue(text);
+            return cell;
         }
 
-        private static excel.SheetData GenerateSheetdataForDetails(List<Veicolo> veicoli)
-        {
-            excel.SheetData sheetData1 = new excel.SheetData();
-            excel.Row headerRow = new excel.Row();
-            headerRow.Append(CreateCell("VOLANTINO VEICOLI", 2U));
-            sheetData1.Append(headerRow);
-            sheetData1.Append(CreateHeaderRowForExcel());
-            excel.Author autore = new excel.Author(Environment.UserName);
-            sheetData1.Append(autore);
-            foreach (Veicolo veicolo in veicoli)
-            {
-                excel.Row partsRows = GenerateRowForChildPartDetail(veicolo);
-                sheetData1.Append(partsRows);
-            }
-            return sheetData1;
-        }
-        private static excel.Row GenerateRowForChildPartDetail(Veicolo veicolo)
-        {
-            excel.Row tRow = new excel.Row();
-            tRow.Append(CreateCell(veicolo.GetType().Name.ToString()));
-            tRow.Append(CreateCell(veicolo.Marca));
-            tRow.Append(CreateCell(veicolo.Modello));
-            tRow.Append(CreateCell(veicolo.DataImmatricolazione.Year.ToString()));
-            tRow.Append(CreateCell(veicolo.Prezzo.ToString()));
-
-            return tRow;
-        }
-
-        private static EnumValue<excel.CellValues> ResolveCellDataTypeOnValue(string text)
+        private static EnumValue<CellValues> ResolveCellDataTypeOnValue(string text)
         {
             int intVal;
             double doubleVal;
             if (int.TryParse(text, out intVal) || double.TryParse(text, out doubleVal))
             {
-                return excel.CellValues.Number;
+                return CellValues.Number;
             }
             else
             {
-                return excel.CellValues.String;
+                return CellValues.String;
             }
         }
 
-        private static excel.Row CreateHeaderRowForExcel()
+        private static void GenerateWorkbookPartContent(WorkbookPart workbookPart1)
         {
-            excel.Row workRow = new excel.Row();
-            workRow.Append(CreateCell("Tipo", 2U));
-            workRow.Append(CreateCell("Marca", 2U));
-            workRow.Append(CreateCell("Modello", 2U));
-            workRow.Append(CreateCell("Data", 2U));
-            workRow.Append(CreateCell("Prezzo", 2U));
-            return workRow;
+            Workbook workbook1 = new Workbook();
+            Sheets sheets1 = new Sheets();
+            Sheet sheet1 = new Sheet() { Name = "Sheet1", SheetId = (UInt32Value)1U, Id = "rId1" };
+            sheets1.Append(sheet1);
+            workbook1.Append(sheets1);
+            workbookPart1.Workbook = workbook1;
         }
-        private static excel.Cell CreateCell(string text, uint styleIndex = 1U)
+
+        private static void GenerateWorksheetPartContent(WorksheetPart worksheetPart1, SheetData sheetData1)
         {
-            excel.Cell cell = new excel.Cell();
-            cell.StyleIndex = styleIndex;
-            cell.DataType = ResolveCellDataTypeOnValue(text);
-            cell.CellValue = new excel.CellValue(text);
-            return cell;
-        }
-        private static void GenerateWorksheetPartContent(WorksheetPart worksheetPart1, excel.SheetData sheetData1)
-        {
-            excel.Worksheet worksheet1 = new excel.Worksheet() { MCAttributes = new MarkupCompatibilityAttributes() { Ignorable = "x14ac" } };
+            Worksheet worksheet1 = new Worksheet() { MCAttributes = new MarkupCompatibilityAttributes() { Ignorable = "x14ac" } };
             worksheet1.AddNamespaceDeclaration("r", "http://schemas.openxmlformats.org/officeDocument/2006/relationships");
             worksheet1.AddNamespaceDeclaration("mc", "http://schemas.openxmlformats.org/markup-compatibility/2006");
             worksheet1.AddNamespaceDeclaration("x14ac", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac");
-            excel.SheetDimension sheetDimension1 = new excel.SheetDimension() { Reference = "A1" };
+            SheetDimension sheetDimension1 = new SheetDimension() { Reference = "A1" };
 
-            excel.SheetViews sheetViews1 = new excel.SheetViews();
+            SheetViews sheetViews1 = new SheetViews();
 
-            excel.SheetView sheetView1 = new excel.SheetView() { TabSelected = true, WorkbookViewId = (UInt32Value)0U };
-            excel.Selection selection1 = new excel.Selection() { ActiveCell = "A1", SequenceOfReferences = new ListValue<StringValue>() { InnerText = "A1" } };
+            SheetView sheetView1 = new SheetView() { TabSelected = true, WorkbookViewId = (UInt32Value)0U };
+            Selection selection1 = new Selection() { ActiveCell = "A1", SequenceOfReferences = new ListValue<StringValue>() { InnerText = "A1" } };
 
             sheetView1.Append(selection1);
 
             sheetViews1.Append(sheetView1);
-            excel.SheetFormatProperties sheetFormatProperties1 = new excel.SheetFormatProperties() { DefaultRowHeight = 15D, DyDescent = 0.25D };
+            SheetFormatProperties sheetFormatProperties1 = new SheetFormatProperties() { DefaultRowHeight = 15D, DyDescent = 0.25D };
 
-            excel.PageMargins pageMargins1 = new excel.PageMargins() { Left = 0.7D, Right = 0.7D, Top = 0.75D, Bottom = 0.75D, Header = 0.3D, Footer = 0.3D };
+            PageMargins pageMargins1 = new PageMargins() { Left = 0.7D, Right = 0.7D, Top = 0.75D, Bottom = 0.75D, Header = 0.3D, Footer = 0.3D };
             worksheet1.Append(sheetDimension1);
             worksheet1.Append(sheetViews1);
             worksheet1.Append(sheetFormatProperties1);
@@ -136,18 +103,18 @@ namespace CarShopLibrary
 
         private static void GenerateWorkbookStylesPartContent(WorkbookStylesPart workbookStylesPart1)
         {
-            excel.Stylesheet stylesheet1 = new excel.Stylesheet() { MCAttributes = new MarkupCompatibilityAttributes() { Ignorable = "x14ac" } };
+            Stylesheet stylesheet1 = new Stylesheet() { MCAttributes = new MarkupCompatibilityAttributes() { Ignorable = "x14ac" } };
             stylesheet1.AddNamespaceDeclaration("mc", "http://schemas.openxmlformats.org/markup-compatibility/2006");
             stylesheet1.AddNamespaceDeclaration("x14ac", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac");
 
-            excel.Fonts fonts1 = new excel.Fonts() { Count = (UInt32Value)2U, KnownFonts = true };
+            Fonts fonts1 = new Fonts() { Count = (UInt32Value)2U, KnownFonts = true };
 
-            excel.Font font1 = new excel.Font();
-            excel.FontSize fontSize1 = new excel.FontSize() { Val = 11D };
-            excel.Color color1 = new excel.Color() { Theme = (UInt32Value)1U };
-            excel.FontName fontName1 = new excel.FontName() { Val = "Calibri" };
-            excel.FontFamilyNumbering fontFamilyNumbering1 = new excel.FontFamilyNumbering() { Val = 2 };
-            excel.FontScheme fontScheme1 = new excel.FontScheme() { Val = excel.FontSchemeValues.Minor };
+            Font font1 = new Font();
+            FontSize fontSize1 = new FontSize() { Val = 11D };
+            Color color1 = new Color() { Theme = (UInt32Value)1U };
+            FontName fontName1 = new FontName() { Val = "Calibri" };
+            FontFamilyNumbering fontFamilyNumbering1 = new FontFamilyNumbering() { Val = 2 };
+            FontScheme fontScheme1 = new FontScheme() { Val = FontSchemeValues.Minor };
 
             font1.Append(fontSize1);
             font1.Append(color1);
@@ -155,13 +122,13 @@ namespace CarShopLibrary
             font1.Append(fontFamilyNumbering1);
             font1.Append(fontScheme1);
 
-            excel.Font font2 = new excel.Font();
-            excel.Bold bold1 = new excel.Bold();
-            excel.FontSize fontSize2 = new excel.FontSize() { Val = 11D };
-            excel.Color color2 = new excel.Color() { Theme = (UInt32Value)1U };
-            excel.FontName fontName2 = new excel.FontName() { Val = "Calibri" };
-            excel.FontFamilyNumbering fontFamilyNumbering2 = new excel.FontFamilyNumbering() { Val = 2 };
-            excel.FontScheme fontScheme2 = new excel.FontScheme() { Val = excel.FontSchemeValues.Minor };
+            Font font2 = new Font();
+            Bold bold1 = new Bold();
+            FontSize fontSize2 = new FontSize() { Val = 11D };
+            Color color2 = new Color() { Theme = (UInt32Value)1U };
+            FontName fontName2 = new FontName() { Val = "Calibri" };
+            FontFamilyNumbering fontFamilyNumbering2 = new FontFamilyNumbering() { Val = 2 };
+            FontScheme fontScheme2 = new FontScheme() { Val = FontSchemeValues.Minor };
 
             font2.Append(bold1);
             font2.Append(fontSize2);
@@ -173,29 +140,29 @@ namespace CarShopLibrary
             fonts1.Append(font1);
             fonts1.Append(font2);
 
-            excel.Fills fills1 = new excel.Fills() { Count = (UInt32Value)2U };
+            Fills fills1 = new Fills() { Count = (UInt32Value)2U };
 
-            excel.Fill fill1 = new excel.Fill();
-            excel.PatternFill patternFill1 = new excel.PatternFill() { PatternType = excel.PatternValues.None };
+            Fill fill1 = new Fill();
+            PatternFill patternFill1 = new PatternFill() { PatternType = PatternValues.None };
 
             fill1.Append(patternFill1);
 
-            excel.Fill fill2 = new excel.Fill();
-            excel.PatternFill patternFill2 = new excel.PatternFill() { PatternType = excel.PatternValues.Gray125 };
+            Fill fill2 = new Fill();
+            PatternFill patternFill2 = new PatternFill() { PatternType = PatternValues.Gray125 };
 
             fill2.Append(patternFill2);
 
             fills1.Append(fill1);
             fills1.Append(fill2);
 
-            excel.Borders borders1 = new excel.Borders() { Count = (UInt32Value)2U };
+            Borders borders1 = new Borders() { Count = (UInt32Value)2U };
 
-            excel.Border border1 = new excel.Border();
-            excel.LeftBorder leftBorder1 = new excel.LeftBorder();
-            excel.RightBorder rightBorder1 = new excel.RightBorder();
-            excel.TopBorder topBorder1 = new excel.TopBorder();
-            excel.BottomBorder bottomBorder1 = new excel.BottomBorder();
-            excel.DiagonalBorder diagonalBorder1 = new excel.DiagonalBorder();
+            Border border1 = new Border();
+            LeftBorder leftBorder1 = new LeftBorder();
+            RightBorder rightBorder1 = new RightBorder();
+            TopBorder topBorder1 = new TopBorder();
+            BottomBorder bottomBorder1 = new BottomBorder();
+            DiagonalBorder diagonalBorder1 = new DiagonalBorder();
 
             border1.Append(leftBorder1);
             border1.Append(rightBorder1);
@@ -203,28 +170,28 @@ namespace CarShopLibrary
             border1.Append(bottomBorder1);
             border1.Append(diagonalBorder1);
 
-            excel.Border border2 = new excel.Border();
+            Border border2 = new Border();
 
-            excel.LeftBorder leftBorder2 = new excel.LeftBorder() { Style = excel.BorderStyleValues.Thin };
-            excel.Color color3 = new excel.Color() { Indexed = (UInt32Value)64U };
+            LeftBorder leftBorder2 = new LeftBorder() { Style = BorderStyleValues.Thin };
+            Color color3 = new Color() { Indexed = (UInt32Value)64U };
 
             leftBorder2.Append(color3);
 
-            excel.RightBorder rightBorder2 = new excel.RightBorder() { Style = excel.BorderStyleValues.Thin };
-            excel.Color color4 = new excel.Color() { Indexed = (UInt32Value)64U };
+            RightBorder rightBorder2 = new RightBorder() { Style = BorderStyleValues.Thin };
+            Color color4 = new Color() { Indexed = (UInt32Value)64U };
 
             rightBorder2.Append(color4);
 
-            excel.TopBorder topBorder2 = new excel.TopBorder() { Style = excel.BorderStyleValues.Thin };
-            excel.Color color5 = new excel.Color() { Indexed = (UInt32Value)64U };
+            TopBorder topBorder2 = new TopBorder() { Style = BorderStyleValues.Thin };
+            Color color5 = new Color() { Indexed = (UInt32Value)64U };
 
             topBorder2.Append(color5);
 
-            excel.BottomBorder bottomBorder2 = new excel.BottomBorder() { Style = excel.BorderStyleValues.Thin };
-            excel.Color color6 = new excel.Color() { Indexed = (UInt32Value)64U };
+            BottomBorder bottomBorder2 = new BottomBorder() { Style = BorderStyleValues.Thin };
+            Color color6 = new Color() { Indexed = (UInt32Value)64U };
 
             bottomBorder2.Append(color6);
-            excel.DiagonalBorder diagonalBorder2 = new excel.DiagonalBorder();
+            DiagonalBorder diagonalBorder2 = new DiagonalBorder();
 
             border2.Append(leftBorder2);
             border2.Append(rightBorder2);
@@ -235,36 +202,36 @@ namespace CarShopLibrary
             borders1.Append(border1);
             borders1.Append(border2);
 
-            excel.CellStyleFormats cellStyleFormats1 = new excel.CellStyleFormats() { Count = (UInt32Value)1U };
-            excel.CellFormat cellFormat1 = new excel.CellFormat() { NumberFormatId = (UInt32Value)0U, FontId = (UInt32Value)0U, FillId = (UInt32Value)0U, BorderId = (UInt32Value)0U };
+            CellStyleFormats cellStyleFormats1 = new CellStyleFormats() { Count = (UInt32Value)1U };
+            CellFormat cellFormat1 = new CellFormat() { NumberFormatId = (UInt32Value)0U, FontId = (UInt32Value)0U, FillId = (UInt32Value)0U, BorderId = (UInt32Value)0U };
 
             cellStyleFormats1.Append(cellFormat1);
 
-            excel.CellFormats cellFormats1 = new excel.CellFormats() { Count = (UInt32Value)3U };
-            excel.CellFormat cellFormat2 = new excel.CellFormat() { NumberFormatId = (UInt32Value)0U, FontId = (UInt32Value)0U, FillId = (UInt32Value)0U, BorderId = (UInt32Value)0U, FormatId = (UInt32Value)0U };
-            excel.CellFormat cellFormat3 = new excel.CellFormat() { NumberFormatId = (UInt32Value)0U, FontId = (UInt32Value)0U, FillId = (UInt32Value)0U, BorderId = (UInt32Value)1U, FormatId = (UInt32Value)0U, ApplyBorder = true };
-            excel.CellFormat cellFormat4 = new excel.CellFormat() { NumberFormatId = (UInt32Value)0U, FontId = (UInt32Value)1U, FillId = (UInt32Value)0U, BorderId = (UInt32Value)1U, FormatId = (UInt32Value)0U, ApplyFont = true, ApplyBorder = true };
+            CellFormats cellFormats1 = new CellFormats() { Count = (UInt32Value)3U };
+            CellFormat cellFormat2 = new CellFormat() { NumberFormatId = (UInt32Value)0U, FontId = (UInt32Value)0U, FillId = (UInt32Value)0U, BorderId = (UInt32Value)0U, FormatId = (UInt32Value)0U };
+            CellFormat cellFormat3 = new CellFormat() { NumberFormatId = (UInt32Value)0U, FontId = (UInt32Value)0U, FillId = (UInt32Value)0U, BorderId = (UInt32Value)1U, FormatId = (UInt32Value)0U, ApplyBorder = true };
+            CellFormat cellFormat4 = new CellFormat() { NumberFormatId = (UInt32Value)0U, FontId = (UInt32Value)1U, FillId = (UInt32Value)0U, BorderId = (UInt32Value)1U, FormatId = (UInt32Value)0U, ApplyFont = true, ApplyBorder = true };
 
             cellFormats1.Append(cellFormat2);
             cellFormats1.Append(cellFormat3);
             cellFormats1.Append(cellFormat4);
 
-            excel.CellStyles cellStyles1 = new excel.CellStyles() { Count = (UInt32Value)1U };
-            excel.CellStyle cellStyle1 = new excel.CellStyle() { Name = "Normal", FormatId = (UInt32Value)0U, BuiltinId = (UInt32Value)0U };
+            CellStyles cellStyles1 = new CellStyles() { Count = (UInt32Value)1U };
+            CellStyle cellStyle1 = new CellStyle() { Name = "Normal", FormatId = (UInt32Value)0U, BuiltinId = (UInt32Value)0U };
 
             cellStyles1.Append(cellStyle1);
-            excel.DifferentialFormats differentialFormats1 = new excel.DifferentialFormats() { Count = (UInt32Value)0U };
-            excel.TableStyles tableStyles1 = new excel.TableStyles() { Count = (UInt32Value)0U, DefaultTableStyle = "TableStyleMedium2", DefaultPivotStyle = "PivotStyleLight16" };
+            DifferentialFormats differentialFormats1 = new DifferentialFormats() { Count = (UInt32Value)0U };
+            TableStyles tableStyles1 = new TableStyles() { Count = (UInt32Value)0U, DefaultTableStyle = "TableStyleMedium2", DefaultPivotStyle = "PivotStyleLight16" };
 
-            excel.StylesheetExtensionList stylesheetExtensionList1 = new excel.StylesheetExtensionList();
+            StylesheetExtensionList stylesheetExtensionList1 = new StylesheetExtensionList();
 
-            excel.StylesheetExtension stylesheetExtension1 = new excel.StylesheetExtension() { Uri = "{EB79DEF2-80B8-43e5-95BD-54CBDDF9020C}" };
+            StylesheetExtension stylesheetExtension1 = new StylesheetExtension() { Uri = "{EB79DEF2-80B8-43e5-95BD-54CBDDF9020C}" };
             stylesheetExtension1.AddNamespaceDeclaration("x14", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/main");
             X14.SlicerStyles slicerStyles1 = new X14.SlicerStyles() { DefaultSlicerStyle = "SlicerStyleLight1" };
 
             stylesheetExtension1.Append(slicerStyles1);
 
-            excel.StylesheetExtension stylesheetExtension2 = new excel.StylesheetExtension() { Uri = "{9260A510-F301-46a8-8635-F512D64BE5F5}" };
+            StylesheetExtension stylesheetExtension2 = new StylesheetExtension() { Uri = "{9260A510-F301-46a8-8635-F512D64BE5F5}" };
             stylesheetExtension2.AddNamespaceDeclaration("x15", "http://schemas.microsoft.com/office/spreadsheetml/2010/11/main");
             X15.TimelineStyles timelineStyles1 = new X15.TimelineStyles() { DefaultTimelineStyle = "TimeSlicerStyleLight1" };
 
@@ -286,15 +253,40 @@ namespace CarShopLibrary
             workbookStylesPart1.Stylesheet = stylesheet1;
         }
 
-        private static void GenerateWorkbookPartContent(WorkbookPart workbookPart1)
+        /*
+           
+        private static SheetData GenerateSheetdataForDetails(List<Veicolo> veicoli)
         {
-            excel.Workbook workbook1 = new excel.Workbook();
-            excel.Sheets sheets1 = new excel.Sheets();
-            excel.Sheet sheet1 = new excel.Sheet() { Name = "Sheet1", SheetId = (UInt32Value)1U, Id = "rId1" };
-            sheets1.Append(sheet1);
-            workbook1.Append(sheets1);
-            workbookPart1.Workbook = workbook1;
+            SheetData sheetData1 = new SheetData();
+            Row headerRow = new Row();
+            headerRow.Append(CreateCell("VOLANTINO VEICOLI", 2U));
+            sheetData1.Append(headerRow);
+            sheetData1.Append(CreateHeaderRowForExcel());
+            Author autore = new Author(Environment.UserName);
+            sheetData1.Append(autore);
+            foreach (Veicolo veicolo in veicoli)
+            {
+                Row partsRows = GenerateRowForChildPartDetail(veicolo);
+                sheetData1.Append(partsRows);
+            }
+            return sheetData1;
         }
+        private static Row GenerateRowForChildPartDetail(Veicolo veicolo)
+        {
+            Row tRow = new Row();
+            tRow.Append(CreateCell(veicolo.GetType().Name.ToString()));
+            tRow.Append(CreateCell(veicolo.Marca));
+            tRow.Append(CreateCell(veicolo.Modello));
+            tRow.Append(CreateCell(veicolo.DataImmatricolazione.Year.ToString()));
+            tRow.Append(CreateCell(veicolo.Prezzo.ToString()));
+
+            return tRow;
+        }
+
+        
+
+        
+         */
 
     }
 }

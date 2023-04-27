@@ -87,8 +87,13 @@ namespace CarShopConsole
         {
             Console.Clear();
             string filePath = AppDomain.CurrentDomain.BaseDirectory + "/test.xlsx";
-            OpenXmlExcelTools.CreateXlsx(ParcoMezzi, AppDomain.CurrentDomain.BaseDirectory + "/test.xlsx");
+            GeneraReportXlsx(filePath);
             Process.Start(filePath);
+        }
+
+        public static void GeneraReportXlsx(string filePath)
+        {
+            OpenXmlExcelTools.CreaDocumento(filePath);
         }
 
         private static void EsportaWord()

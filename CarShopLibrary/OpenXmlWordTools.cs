@@ -51,7 +51,7 @@ namespace CarShopLibrary
                 { NumberID = 1 });
             element.Save(numberingPart);
 
-            // Create the document structure and add some text
+            // Create the document structure
             mainPart.Document = new Document();
             Body docBody = new Body();
             mainPart.Document.AppendChild(docBody);
