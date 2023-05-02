@@ -1,5 +1,6 @@
 ﻿using CarShopLibrary;
 using DocumentFormat.OpenXml.Packaging;
+using Excel = DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
 using System;
 using System.Collections.Generic;
@@ -93,7 +94,19 @@ namespace CarShopConsole
 
         public static void GeneraReportXlsx(string filePath)
         {
-            OpenXmlExcelTools.CreaDocumento(filePath);
+            SpreadsheetDocument reportDocument = OpenXmlExcelTools.CreaDocumento(filePath);
+            using (reportDocument)
+            {
+                IEnumerable<Excel.Sheet> sheets = reportDocument.WorkbookPart.Workbook.GetFirstChild<Excel.Sheets>().Elements<Excel.Sheet>();
+                WorksheetPart worksheetPart = (WorksheetPart)reportDocument.WorkbookPart.GetPartById(sheets.First().Id.Value);
+                Excel.SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<Excel.SheetData>();
+                string[] intestazione =
+                {
+                    "ID","MARCA","MODELLO","DATA", "PREZZO"
+                };
+                Excel.Row row = OpenXmlExcelTools.CreaIntestazione(intestazione);
+                sheetData.Append(row);
+            }
         }
 
         private static void EsportaWord()
@@ -188,7 +201,7 @@ namespace CarShopConsole
                 foreach (var item in elenco) docBody.Append(item);
 
                 // test immagine
-                p= OpenXmlWordTools.AggiungiImmagine(volantinoDocument.MainDocumentPart,
+                p = OpenXmlWordTools.AggiungiImmagine(volantinoDocument.MainDocumentPart,
                     "https://www.robinsonpetshop.it/news/cms2017/wp-content/uploads/2022/07/GattinoPrimiMesi.jpg",
                     "center", 100, 100);
                 docBody.Append(p);

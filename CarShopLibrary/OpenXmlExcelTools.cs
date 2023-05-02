@@ -16,18 +16,15 @@ namespace CarShopLibrary
         public static SpreadsheetDocument CreaDocumento(string filePath)
         {
             SpreadsheetDocument excelDocument = SpreadsheetDocument.Create(filePath, SpreadsheetDocumentType.Workbook);
-            using (excelDocument)
-            {
-                WorkbookPart workbookPart1 = excelDocument.AddWorkbookPart();
-                GenerateWorkbookPartContent(workbookPart1);
-                WorkbookStylesPart workbookStylesPart1 = workbookPart1.AddNewPart<WorkbookStylesPart>("rId3");
-                GenerateWorkbookStylesPartContent(workbookStylesPart1);
-                WorksheetPart worksheetPart1 = workbookPart1.AddNewPart<WorksheetPart>("rId1");
-                SheetData sheetData1 = new SheetData();
-                Author autore = new Author(Environment.UserName);
-                sheetData1.Append(autore);
-                GenerateWorksheetPartContent(worksheetPart1, sheetData1);
-            }
+            WorkbookPart workbookPart1 = excelDocument.AddWorkbookPart();
+            GenerateWorkbookPartContent(workbookPart1);
+            WorkbookStylesPart workbookStylesPart1 = workbookPart1.AddNewPart<WorkbookStylesPart>("rId3");
+            GenerateWorkbookStylesPartContent(workbookStylesPart1);
+            WorksheetPart worksheetPart1 = workbookPart1.AddNewPart<WorksheetPart>("rId1");
+            SheetData sheetData1 = new SheetData();
+            Author autore = new Author(Environment.UserName);
+            sheetData1.Append(autore);
+            GenerateWorksheetPartContent(worksheetPart1, sheetData1);
             return excelDocument;
         }
 
