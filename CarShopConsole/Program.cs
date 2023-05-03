@@ -100,12 +100,19 @@ namespace CarShopConsole
                 IEnumerable<Excel.Sheet> sheets = reportDocument.WorkbookPart.Workbook.GetFirstChild<Excel.Sheets>().Elements<Excel.Sheet>();
                 WorksheetPart worksheetPart = (WorksheetPart)reportDocument.WorkbookPart.GetPartById(sheets.First().Id.Value);
                 Excel.SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<Excel.SheetData>();
-                string[] intestazione =
-                {
-                    "ID","MARCA","MODELLO","DATA", "PREZZO"
-                };
-                Excel.Row row = OpenXmlExcelTools.CreaIntestazione(intestazione);
+                Excel.Row row = OpenXmlExcelTools.CreaRiga();
+                row.Append(OpenXmlExcelTools.CreaCella("VOLANTINO VEICOLI IN VENDITA", true));
                 sheetData.Append(row);
+                row = OpenXmlExcelTools.CreaRiga(); sheetData.Append(row);  // riga vuota fra titolo e tabella
+                string[] intestazione = { "VIN", "MARCA", "MODELLO", "DATA", "PREZZO" };
+                row = OpenXmlExcelTools.CreaRiga(intestazione, true);
+                sheetData.Append(row);
+                foreach (Veicolo veicolo in ParcoMezzi)
+                {
+                    string[] datiRiga = { veicolo.VIN, veicolo.Marca, veicolo.Modello, veicolo.DataImmatricolazione.ToShortDateString(), veicolo.Prezzo.ToString() };
+                    row = OpenXmlExcelTools.CreaRiga(datiRiga);
+                    sheetData.Append(row);
+                }
             }
         }
 

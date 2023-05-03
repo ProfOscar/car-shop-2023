@@ -28,20 +28,23 @@ namespace CarShopLibrary
             return excelDocument;
         }
 
-        public static Row CreaIntestazione(string[] contenuto)
+        public static Row CreaRiga(string[] contenuto = null, bool isBold = false)
         {
             Row row = new Row();
-            for (int i = 0; i < contenuto.Length; i++)
+            if (contenuto != null)
             {
-                row.Append(CreateCell(contenuto[i], 2U));
+                for (int i = 0; i < contenuto.Length; i++)
+                {
+                    row.Append(CreaCella(contenuto[i], isBold));
+                }
             }
             return row;
         }
 
-        private static Cell CreateCell(string text, uint styleIndex = 1U)
+        public static Cell CreaCella(string text, bool isBold = false)
         {
             Cell cell = new Cell();
-            cell.StyleIndex = styleIndex;
+            cell.StyleIndex = isBold ? 2U : 1U;
             cell.DataType = ResolveCellDataTypeOnValue(text);
             cell.CellValue = new CellValue(text);
             return cell;
@@ -249,41 +252,6 @@ namespace CarShopLibrary
 
             workbookStylesPart1.Stylesheet = stylesheet1;
         }
-
-        /*
-           
-        private static SheetData GenerateSheetdataForDetails(List<Veicolo> veicoli)
-        {
-            SheetData sheetData1 = new SheetData();
-            Row headerRow = new Row();
-            headerRow.Append(CreateCell("VOLANTINO VEICOLI", 2U));
-            sheetData1.Append(headerRow);
-            sheetData1.Append(CreateHeaderRowForExcel());
-            Author autore = new Author(Environment.UserName);
-            sheetData1.Append(autore);
-            foreach (Veicolo veicolo in veicoli)
-            {
-                Row partsRows = GenerateRowForChildPartDetail(veicolo);
-                sheetData1.Append(partsRows);
-            }
-            return sheetData1;
-        }
-        private static Row GenerateRowForChildPartDetail(Veicolo veicolo)
-        {
-            Row tRow = new Row();
-            tRow.Append(CreateCell(veicolo.GetType().Name.ToString()));
-            tRow.Append(CreateCell(veicolo.Marca));
-            tRow.Append(CreateCell(veicolo.Modello));
-            tRow.Append(CreateCell(veicolo.DataImmatricolazione.Year.ToString()));
-            tRow.Append(CreateCell(veicolo.Prezzo.ToString()));
-
-            return tRow;
-        }
-
-        
-
-        
-         */
 
     }
 }
