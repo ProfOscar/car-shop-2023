@@ -7,6 +7,7 @@ using System.IO;
 using DocumentFormat.OpenXml.Spreadsheet;
 using X14 = DocumentFormat.OpenXml.Office2010.Excel;
 using X15 = DocumentFormat.OpenXml.Office2013.Excel;
+using System.Linq;
 
 namespace CarShopLibrary
 {
@@ -28,23 +29,38 @@ namespace CarShopLibrary
             return excelDocument;
         }
 
-        public static Row CreaRiga(string[] contenuto = null, bool isBold = false)
+        public static SheetData getFirstSheetData(SpreadsheetDocument document)
+        {
+            IEnumerable<Sheet> sheets = document.WorkbookPart.Workbook.GetFirstChild<Sheets>().Elements<Sheet>();
+            WorksheetPart worksheetPart = (WorksheetPart)document.WorkbookPart.GetPartById(sheets.First().Id.Value);
+            SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
+            return sheetData;
+        }
+
+        public static Row CreaRiga(string[] contenuto = null, bool isBold = false, bool isBorder = false)
         {
             Row row = new Row();
             if (contenuto != null)
             {
                 for (int i = 0; i < contenuto.Length; i++)
                 {
-                    row.Append(CreaCella(contenuto[i], isBold));
+                    row.Append(CreaCella(contenuto[i], isBold, isBorder));
                 }
             }
             return row;
         }
 
-        public static Cell CreaCella(string text, bool isBold = false)
+        public static Cell CreaCella(string text, bool isBold = false, bool isBorder = false)
         {
             Cell cell = new Cell();
-            cell.StyleIndex = isBold ? 2U : 1U;
+            if (!isBold && !isBorder)
+                cell.StyleIndex = 0U;
+            else if (isBold && !isBorder)
+                cell.StyleIndex = 1U;
+            else if (!isBold && isBorder)
+                cell.StyleIndex = 2U;
+            else if (isBold && isBorder)
+                cell.StyleIndex = 3U;
             cell.DataType = ResolveCellDataTypeOnValue(text);
             cell.CellValue = new CellValue(text);
             return cell;
@@ -207,14 +223,16 @@ namespace CarShopLibrary
 
             cellStyleFormats1.Append(cellFormat1);
 
-            CellFormats cellFormats1 = new CellFormats() { Count = (UInt32Value)3U };
-            CellFormat cellFormat2 = new CellFormat() { NumberFormatId = (UInt32Value)0U, FontId = (UInt32Value)0U, FillId = (UInt32Value)0U, BorderId = (UInt32Value)0U, FormatId = (UInt32Value)0U };
-            CellFormat cellFormat3 = new CellFormat() { NumberFormatId = (UInt32Value)0U, FontId = (UInt32Value)0U, FillId = (UInt32Value)0U, BorderId = (UInt32Value)1U, FormatId = (UInt32Value)0U, ApplyBorder = true };
-            CellFormat cellFormat4 = new CellFormat() { NumberFormatId = (UInt32Value)0U, FontId = (UInt32Value)1U, FillId = (UInt32Value)0U, BorderId = (UInt32Value)1U, FormatId = (UInt32Value)0U, ApplyFont = true, ApplyBorder = true };
+            CellFormats cellFormats1 = new CellFormats() { Count = (UInt32Value)4U };
+            CellFormat cellFormat0U = new CellFormat() { NumberFormatId = (UInt32Value)0U, FontId = (UInt32Value)0U, FillId = (UInt32Value)0U, BorderId = (UInt32Value)0U, FormatId = (UInt32Value)0U };
+            CellFormat cellFormat1U = new CellFormat() { NumberFormatId = (UInt32Value)0U, FontId = (UInt32Value)1U, FillId = (UInt32Value)0U, BorderId = (UInt32Value)0U, FormatId = (UInt32Value)0U, ApplyFont = true };
+            CellFormat cellFormat2U = new CellFormat() { NumberFormatId = (UInt32Value)0U, FontId = (UInt32Value)0U, FillId = (UInt32Value)0U, BorderId = (UInt32Value)1U, FormatId = (UInt32Value)0U, ApplyBorder = true };
+            CellFormat cellFormat3U = new CellFormat() { NumberFormatId = (UInt32Value)0U, FontId = (UInt32Value)1U, FillId = (UInt32Value)0U, BorderId = (UInt32Value)1U, FormatId = (UInt32Value)0U, ApplyFont = true, ApplyBorder = true };
 
-            cellFormats1.Append(cellFormat2);
-            cellFormats1.Append(cellFormat3);
-            cellFormats1.Append(cellFormat4);
+            cellFormats1.Append(cellFormat0U);
+            cellFormats1.Append(cellFormat1U);
+            cellFormats1.Append(cellFormat2U);
+            cellFormats1.Append(cellFormat3U);
 
             CellStyles cellStyles1 = new CellStyles() { Count = (UInt32Value)1U };
             CellStyle cellStyle1 = new CellStyle() { Name = "Normal", FormatId = (UInt32Value)0U, BuiltinId = (UInt32Value)0U };

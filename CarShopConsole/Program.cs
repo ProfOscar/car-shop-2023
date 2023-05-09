@@ -97,20 +97,18 @@ namespace CarShopConsole
             SpreadsheetDocument reportDocument = OpenXmlExcelTools.CreaDocumento(filePath);
             using (reportDocument)
             {
-                IEnumerable<Excel.Sheet> sheets = reportDocument.WorkbookPart.Workbook.GetFirstChild<Excel.Sheets>().Elements<Excel.Sheet>();
-                WorksheetPart worksheetPart = (WorksheetPart)reportDocument.WorkbookPart.GetPartById(sheets.First().Id.Value);
-                Excel.SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<Excel.SheetData>();
+                Excel.SheetData sheetData = OpenXmlExcelTools.getFirstSheetData(reportDocument);
                 Excel.Row row = OpenXmlExcelTools.CreaRiga();
-                row.Append(OpenXmlExcelTools.CreaCella("VOLANTINO VEICOLI IN VENDITA", true));
+                row.Append(OpenXmlExcelTools.CreaCella("VOLANTINO VEICOLI IN VENDITA", true, false));
                 sheetData.Append(row);
                 row = OpenXmlExcelTools.CreaRiga(); sheetData.Append(row);  // riga vuota fra titolo e tabella
                 string[] intestazione = { "VIN", "MARCA", "MODELLO", "DATA", "PREZZO" };
-                row = OpenXmlExcelTools.CreaRiga(intestazione, true);
+                row = OpenXmlExcelTools.CreaRiga(intestazione, true, true);
                 sheetData.Append(row);
                 foreach (Veicolo veicolo in ParcoMezzi)
                 {
                     string[] datiRiga = { veicolo.VIN, veicolo.Marca, veicolo.Modello, veicolo.DataImmatricolazione.ToShortDateString(), veicolo.Prezzo.ToString() };
-                    row = OpenXmlExcelTools.CreaRiga(datiRiga);
+                    row = OpenXmlExcelTools.CreaRiga(datiRiga, false, true);
                     sheetData.Append(row);
                 }
             }
