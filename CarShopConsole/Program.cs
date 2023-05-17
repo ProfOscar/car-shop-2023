@@ -16,7 +16,8 @@ namespace CarShopConsole
     {
         const string lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quam augue, tempus id metus in, laoreet viverra quam. Sed vulputate risus lacus, et dapibus orci porttitor non.";
 
-        static IDataTools dataTools = new JsonTools();
+        //static IDataTools dataTools = new JsonTools();
+        static IDataTools dataTools = new DbTools();
         static List<Veicolo> ParcoMezzi = new List<Veicolo>();
 
         static void Main(string[] args)
