@@ -16,6 +16,7 @@ namespace CarShopConsole
     {
         const string lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quam augue, tempus id metus in, laoreet viverra quam. Sed vulputate risus lacus, et dapibus orci porttitor non.";
 
+        static IDataTools dataTools = new JsonTools();
         static List<Veicolo> ParcoMezzi = new List<Veicolo>();
 
         static void Main(string[] args)
@@ -238,7 +239,7 @@ namespace CarShopConsole
 
         private static void SalvaDati()
         {
-            if (JsonTools.SalvaDati(ParcoMezzi))
+            if (dataTools.SalvaDati(ParcoMezzi))
             {
                 Console.WriteLine("\n*** SCRITTURA DATI OK ***");
                 Thread.Sleep(2000);
@@ -248,7 +249,7 @@ namespace CarShopConsole
 
         private static void CaricaDati()
         {
-            ParcoMezzi = JsonTools.CaricaDati();
+            ParcoMezzi = dataTools.CaricaDati();
             if (ParcoMezzi != null)
             {
                 Console.WriteLine("\n*** CARICAMENTO DATI OK ***");

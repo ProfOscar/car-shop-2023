@@ -5,11 +5,11 @@ using System.Text.Json;
 
 namespace CarShopLibrary
 {
-    public class JsonTools
+    public class JsonTools : IDataTools
     {
         const string fileName = "parco-auto.json";
 
-        public static bool SalvaDati(List<Veicolo> dati)
+        public bool SalvaDati(List<Veicolo> dati)
         {
             try
             {
@@ -26,7 +26,7 @@ namespace CarShopLibrary
             }
         }
 
-        public static List<Veicolo> CaricaDati()
+        public List<Veicolo> CaricaDati()
         {
             try
             {
