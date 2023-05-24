@@ -50,12 +50,17 @@ namespace CarShopLibrary
                             {
                                 case 1:
                                     // auto
-                                    Auto a = new Auto(marca, modello, alimentazione, colore, dimensioni, vin, km, maxSpeed, potenza, dataImmatricolazione, prezzo, immagine, false, 0, 0);
+                                    bool isIntegrale = Convert.ToBoolean(reader["AutoIsIntegrale"]);
+                                    int numPorte = Convert.ToInt32(reader["AutoNumPorte"]);
+                                    int dimCerchi = Convert.ToInt32(reader["AutoDimCerchi"]);
+                                    Auto a = new Auto(marca, modello, alimentazione, colore, dimensioni, vin, km, maxSpeed, potenza, dataImmatricolazione, prezzo, immagine, isIntegrale, numPorte, dimCerchi);
                                     veicoli.Add(a);
                                     break;
                                 case 2:
                                     // moto
-                                    Moto m = new Moto(marca, modello, alimentazione, colore, dimensioni, vin, km, maxSpeed, potenza, dataImmatricolazione, prezzo, immagine, ETipoMoto.Undefined, 0);
+                                    ETipoMoto tipoMoto = (ETipoMoto)(Convert.ToInt32(reader["MotoIdTipologia"]) - 1);
+                                    int numTempi = Convert.ToInt32(reader["MotoNumTempi"]);
+                                    Moto m = new Moto(marca, modello, alimentazione, colore, dimensioni, vin, km, maxSpeed, potenza, dataImmatricolazione, prezzo, immagine, tipoMoto, numTempi);
                                     veicoli.Add(m);
                                     break;
                                 default:
