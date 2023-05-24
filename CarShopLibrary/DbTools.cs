@@ -9,7 +9,12 @@ namespace CarShopLibrary
 {
     public class DbTools : IDataTools
     {
-        const string connStr = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\oscar.cambieri\Desktop\car-shop-2023\CarShopLibrary\ParcoMezzi.mdf;Integrated Security=True";
+        string connStr;
+
+        public DbTools(string appPath)
+        {
+            connStr = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=" + appPath + "; Integrated Security=True";
+        }
 
         public List<Veicolo> CaricaDati()
         {
